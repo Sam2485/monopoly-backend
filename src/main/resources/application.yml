@@ -2,9 +2,9 @@ spring:
   application:
     name: Vyapar
   datasource:
-    url: ${DATABASE_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/monopoly}}
-    username: ${DB_USERNAME:${SPRING_DATASOURCE_USERNAME:rajshaikh}}
-    password: ${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:Sam@2445}}
+    url: ${DATABASE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

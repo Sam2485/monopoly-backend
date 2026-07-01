@@ -1,0 +1,6 @@
+[
+  { "id": 1, "title": "Lottery Winner", "action": "ADD_MONEY", "amount": 3000 },
+  { "id": 2, "title": "Passed Exam Bonus", "action": "ADD_MONEY", "amount": 1000 },
+  { "id": 3, "title": "Get Out of Jail Free", "action": "GET_OUT_OF_JAIL", "amount": 0 },
+  { "id": 4, "title": "Welcome Reward", "action": "ADD_MONEY", "amount": 500 }
+]

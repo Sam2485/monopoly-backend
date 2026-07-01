@@ -1,0 +1,16 @@
+{
+  "startingMoney": 25000,
+  "passStartReward": 2000,
+  "jailBail": 500,
+  "clubFee": 100,
+  "incomeTaxPercentage": 2,
+  "wealthTaxPerProperty": 50,
+  "mortgagePercentage": 50,
+  "unmortgageInterest": 10,
+  "houseSellPercentage": 50,
+  "hotelSellPercentage": 50,
+  "majorityOwnership": 3,
+  "maximumPlayers": 6,
+  "minimumPlayers": 2,
+  "maximumHouses": 3
+}

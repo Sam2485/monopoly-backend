@@ -1,0 +1,8 @@
+[
+  { "id": 1, "title": "DYP pages pay 200", "action": "PAY_MONEY", "amount": 200 },
+  { "id": 2, "title": "Buy Apron 500 ", "action": "PAY_MONEY", "amount": 500 },
+  { "id": 3, "title": "Buy Calculator 1300", "action": "PAY_MONEY", "amount": 1300 },
+  { "id": 4, "title": "Astrotalk fees (10%) 3300", "action": "PAY_MONEY", "amount": 3300 },
+  { "id": 5, "title": "M2 back Rechecking", "action": "PAY_MONEY", "amount": 800 },
+  { "id": 6, "title": "Community chest var alyachi party 1300", "action": "PAY_MONEY", "amount": 1300 }
+]

@@ -13,4 +13,4 @@ spring:
     baseline-on-migrate: true
 
 server:
-  port: ${PORT:9090}
+  port: ${PORT:8080}

@@ -1,8 +1,8 @@
 -- V1__init.sql
--- Initial Schema Migration for Vyapar Game
+-- Initial Schema Migration for Vyapar Game with IF NOT EXISTS checks
 
 -- 1. Users Table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
     firebase_uid VARCHAR(128) NOT NULL UNIQUE,
     username VARCHAR(30) NOT NULL UNIQUE,
@@ -14,7 +14,7 @@ CREATE TABLE users (
 );
 
 -- 2. Game Room Table
-CREATE TABLE game_room (
+CREATE TABLE IF NOT EXISTS game_room (
     id UUID PRIMARY KEY,
     room_code VARCHAR(6) NOT NULL UNIQUE,
     host_id UUID NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE game_room (
 );
 
 -- 3. Game Table
-CREATE TABLE game (
+CREATE TABLE IF NOT EXISTS game (
     id UUID PRIMARY KEY,
     room_id UUID NOT NULL,
     current_turn_player_id UUID,
@@ -39,7 +39,7 @@ CREATE TABLE game (
 );
 
 -- 4. Player Table
-CREATE TABLE player (
+CREATE TABLE IF NOT EXISTS player (
     id UUID PRIMARY KEY,
     game_id UUID NOT NULL,
     user_id UUID NOT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE player (
 );
 
 -- 5. Owned Property Table
-CREATE TABLE owned_property (
+CREATE TABLE IF NOT EXISTS owned_property (
     game_id UUID NOT NULL,
     property_id INTEGER NOT NULL,
     owner_id UUID NOT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE owned_property (
 );
 
 -- 6. Transaction History Table
-CREATE TABLE transaction_history (
+CREATE TABLE IF NOT EXISTS transaction_history (
     id UUID PRIMARY KEY,
     game_id UUID NOT NULL,
     player_id UUID NOT NULL,

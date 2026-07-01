@@ -49,22 +49,14 @@ public class AuthenticationService {
             user = userOpt.get();
             // Verify Password
             if (!passwordEncoder.matches(password, user.getPassword())) {
-                throw new VyaparException("Invalid username or password", "INVALID_CREDENTIALS", HttpStatus.UNAUTHORIZED);
+                throw new VyaparException("Invalid username or password", "INVALID_CREDENTIALS", org.springframework.http.HttpStatus.UNAUTHORIZED);
             }
         } else {
-            // Register new user (with the entered username & password)
+            // Register new user with username and password
             user = new User();
             user.setId(UUID.randomUUID());
             user.setUsername(username);
             user.setPassword(passwordEncoder.encode(password));
-            user.setFirebaseUid(UUID.randomUUID().toString()); // Placeholder to satisfy DB constraints
-
-            String email = request.getEmail();
-            if (email == null || email.isBlank()) {
-                email = username.toLowerCase() + "@vyapar.com";
-            }
-            user.setEmail(email);
-            user.setProfileImage("https://api.dicebear.com/7.x/pixel-art/svg?seed=" + username);
             user.setCreatedAt(LocalDateTime.now());
             user.setUpdatedAt(LocalDateTime.now());
 
@@ -72,7 +64,7 @@ public class AuthenticationService {
         }
 
         String token = tokenService.generateToken(user);
-        return new LoginResponse(user.getId(), user.getUsername(), user.getEmail(), token);
+        return new LoginResponse(user.getId(), user.getUsername(), token);
     }
 
     public User getCurrentUser() {

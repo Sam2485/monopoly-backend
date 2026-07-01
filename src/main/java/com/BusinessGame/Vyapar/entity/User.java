@@ -16,20 +16,11 @@ public class User {
     @Id
     private UUID id;
 
-    @Column(name = "firebase_uid", nullable = false, unique = true, length = 128)
-    private String firebaseUid;
-
     @Column(nullable = false, unique = true, length = 30)
     private String username;
 
-    @Column(nullable = false, unique = true, length = 120)
-    private String email;
-
     @Column(nullable = false, length = 128)
     private String password;
-
-    @Column(name = "profile_image")
-    private String profileImage;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

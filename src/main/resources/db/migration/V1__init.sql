@@ -4,16 +4,13 @@
 -- 1. Users Table
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
-    firebase_uid VARCHAR(128) NOT NULL UNIQUE,
     username VARCHAR(30) NOT NULL UNIQUE,
-    email VARCHAR(120) NOT NULL UNIQUE,
     password VARCHAR(128) NOT NULL,
-    profile_image VARCHAR(255),
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
 );
 
--- 2. Game Room Table
+
 CREATE TABLE IF NOT EXISTS game_room (
     id UUID PRIMARY KEY,
     room_code VARCHAR(6) NOT NULL UNIQUE,
@@ -24,7 +21,7 @@ CREATE TABLE IF NOT EXISTS game_room (
     created_at TIMESTAMP NOT NULL
 );
 
--- 3. Game Table
+
 CREATE TABLE IF NOT EXISTS game (
     id UUID PRIMARY KEY,
     room_id UUID NOT NULL,
@@ -38,7 +35,7 @@ CREATE TABLE IF NOT EXISTS game (
     finished_at TIMESTAMP
 );
 
--- 4. Player Table
+
 CREATE TABLE IF NOT EXISTS player (
     id UUID PRIMARY KEY,
     game_id UUID NOT NULL,
@@ -57,7 +54,7 @@ CREATE TABLE IF NOT EXISTS player (
     version BIGINT
 );
 
--- 5. Owned Property Table
+
 CREATE TABLE IF NOT EXISTS owned_property (
     game_id UUID NOT NULL,
     property_id INTEGER NOT NULL,
@@ -68,7 +65,7 @@ CREATE TABLE IF NOT EXISTS owned_property (
     PRIMARY KEY (game_id, property_id)
 );
 
--- 6. Transaction History Table
+
 CREATE TABLE IF NOT EXISTS transaction_history (
     id UUID PRIMARY KEY,
     game_id UUID NOT NULL,

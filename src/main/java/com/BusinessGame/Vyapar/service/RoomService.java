@@ -26,6 +26,7 @@ public class RoomService {
     private final AuthenticationService authenticationService;
     private final TransactionService transactionService;
     private final GameEventPublisher eventPublisher;
+    private final JsonLoaderService jsonLoaderService;
     private final Random random = new SecureRandom();
 
     public RoomService(GameRoomRepository gameRoomRepository,
@@ -34,7 +35,8 @@ public class RoomService {
                        GameRepository gameRepository,
                        AuthenticationService authenticationService,
                        TransactionService transactionService,
-                       GameEventPublisher eventPublisher) {
+                       GameEventPublisher eventPublisher,
+                       JsonLoaderService jsonLoaderService) {
         this.gameRoomRepository = gameRoomRepository;
         this.playerRepository = playerRepository;
         this.userRepository = userRepository;
@@ -42,6 +44,7 @@ public class RoomService {
         this.authenticationService = authenticationService;
         this.transactionService = transactionService;
         this.eventPublisher = eventPublisher;
+        this.jsonLoaderService = jsonLoaderService;
     }
 
     @Transactional
@@ -74,7 +77,7 @@ public class RoomService {
         hostPlayer.setGameId(room.getId());
         hostPlayer.setUserId(currentUser.getId());
         hostPlayer.setUsername(currentUser.getUsername());
-        hostPlayer.setBalance(25000);
+        hostPlayer.setBalance(jsonLoaderService.getGameRules().getStartingMoney());
         hostPlayer.setPosition(0);
         hostPlayer.setNumberOfProperties(0);
         hostPlayer.setConsecutiveDoubles(0);
@@ -113,7 +116,7 @@ public class RoomService {
         player.setGameId(room.getId());
         player.setUserId(currentUser.getId());
         player.setUsername(currentUser.getUsername());
-        player.setBalance(25000);
+        player.setBalance(jsonLoaderService.getGameRules().getStartingMoney());
         player.setPosition(0);
         player.setNumberOfProperties(0);
         player.setConsecutiveDoubles(0);
@@ -227,7 +230,7 @@ public class RoomService {
             // Keep balance and starting position
             Player p = players.get(i);
             p.setPosition(0);
-            p.setBalance(25000);
+            p.setBalance(jsonLoaderService.getGameRules().getStartingMoney());
             playerRepository.save(p);
         }
 

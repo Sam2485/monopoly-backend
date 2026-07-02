@@ -73,8 +73,9 @@ public class CardService {
                 break;
             case "MOVE_TO_START":
                 player.setPosition(0);
-                player.setBalance(player.getBalance() + 2000);
-                transactionService.recordTransaction(player.getGameId(), player.getId(), transType, 2000, "Drawn Card: " + desc + " (Moved to START, +₹2000)");
+                int reward = jsonLoaderService.getGameRules().getPassStartReward();
+                player.setBalance(player.getBalance() + reward);
+                transactionService.recordTransaction(player.getGameId(), player.getId(), transType, reward, "Drawn Card: " + desc + " (Moved to START, +₹" + reward + ")");
                 break;
             case "LOSE_NEXT_TURN":
                 player.setSkippedTurns(player.getSkippedTurns() + 1);

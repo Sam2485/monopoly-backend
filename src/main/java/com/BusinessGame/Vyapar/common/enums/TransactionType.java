@@ -16,5 +16,6 @@ public enum TransactionType {
     START_REWARD,
     CLUB_PAYMENT,
     BAIL_PAYMENT,
-    BANKRUPTCY
+    BANKRUPTCY,
+    TRADE
 }

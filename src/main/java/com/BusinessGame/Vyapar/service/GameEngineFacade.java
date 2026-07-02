@@ -190,13 +190,14 @@ public class GameEngineFacade {
 
         // Check passing START
         if (newPos < oldPos || newPos == 0) {
-            player.setBalance(player.getBalance() + 2000);
+            int reward = jsonLoaderService.getGameRules().getPassStartReward();
+            player.setBalance(player.getBalance() + reward);
             transactionService.recordTransaction(
                     game.getId(),
                     player.getId(),
                     TransactionType.START_REWARD,
-                    2000,
-                    player.getUsername() + " passed START and collected ₹2000."
+                    reward,
+                    player.getUsername() + " passed START and collected ₹" + reward + "."
             );
             eventPublisher.publish(game.getId(), GameEvent.of(EventType.MONEY_UPDATED, game.getId(), Map.of(
                     "playerId", player.getId(),

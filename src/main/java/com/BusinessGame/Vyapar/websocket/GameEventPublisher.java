@@ -3,6 +3,8 @@ package com.BusinessGame.Vyapar.websocket;
 import com.BusinessGame.Vyapar.common.enums.EventType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.UUID;
 
@@ -16,6 +18,19 @@ public class GameEventPublisher {
     }
 
     public void publish(UUID gameId, GameEvent event) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    sendEvent(gameId, event);
+                }
+            });
+        } else {
+            sendEvent(gameId, event);
+        }
+    }
+
+    private void sendEvent(UUID gameId, GameEvent event) {
         // Send to general game topic
         String topic = "/topic/game/" + gameId;
         messagingTemplate.convertAndSend(topic, event);
@@ -35,6 +50,15 @@ public class GameEventPublisher {
     }
 
     public void publishRoomUpdate(UUID roomId, Object roomPayload) {
-        messagingTemplate.convertAndSend("/topic/room/" + roomId, roomPayload);
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    messagingTemplate.convertAndSend("/topic/room/" + roomId, roomPayload);
+                }
+            });
+        } else {
+            messagingTemplate.convertAndSend("/topic/room/" + roomId, roomPayload);
+        }
     }
 }

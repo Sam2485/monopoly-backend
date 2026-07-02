@@ -266,7 +266,8 @@ public class GameEngineFacade {
                             eventPublisher.publish(game.getId(), GameEvent.of(EventType.RENT_PAID, game.getId(), Map.of(
                                     "fromPlayer", player.getId(),
                                     "toPlayer", owner.getId(),
-                                    "amount", rent
+                                    "amount", rent,
+                                    "propertyId", propId
                             ), game.getVersion()));
 
                             eventPublisher.publish(game.getId(), GameEvent.of(EventType.MONEY_UPDATED, game.getId(), Map.of(

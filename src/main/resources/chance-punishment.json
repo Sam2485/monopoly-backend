@@ -1,8 +1,9 @@
 [
   { "id": 1, "title": "Dengue malaria Rapid test(Global Hospital) 1500", "action": "PAY_MONEY", "amount": 1500 },
-  { "id": 2, "title": "Vaf machine bill 2000", "action": "PAY_MONEY", "amount": 2000 },
+  { "id": 2, "title": "Vaf machine bill 150*6 = 900(Thanks from Ojas Hospital)", "action": "PAY_MONEY", "amount": 900 },
   { "id": 3, "title": "Light Bill(Padmapushp Nivas) 2500", "action": "PAY_MONEY", "amount": 2500 },
   { "id": 4, "title": "Go to Jail", "action": "GO_TO_JAIL", "amount": 0 },
   { "id": 5, "title": "Matka Futala 200", "action": "PAY_MONEY", "amount": 200 },
-  { "id": 6, "title": "Chance var alyachi party 800", "action": "PAY_MONEY", "amount": 800 }
+  { "id": 6, "title": "Chance var alyachi party 800", "action": "PAY_MONEY", "amount": 800 },
+  { "id": 7, "title": "Padmapushp Kitchen pipe Blocked 1400 (for more details contact pragyan oza)", "action": "PAY_MONEY", "amount": 1400 }
 ]

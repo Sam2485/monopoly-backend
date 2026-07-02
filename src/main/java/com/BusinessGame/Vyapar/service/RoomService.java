@@ -7,6 +7,7 @@ import com.BusinessGame.Vyapar.dto.RoomResponse;
 import com.BusinessGame.Vyapar.entity.*;
 import com.BusinessGame.Vyapar.repository.*;
 import com.BusinessGame.Vyapar.websocket.GameEventPublisher;
+import com.BusinessGame.Vyapar.websocket.GameEvent;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ public class RoomService {
     private final TransactionService transactionService;
     private final GameEventPublisher eventPublisher;
     private final JsonLoaderService jsonLoaderService;
+    private final FinancialService financialService;
     private final Random random = new SecureRandom();
 
     public RoomService(GameRoomRepository gameRoomRepository,
@@ -36,7 +38,8 @@ public class RoomService {
                        AuthenticationService authenticationService,
                        TransactionService transactionService,
                        GameEventPublisher eventPublisher,
-                       JsonLoaderService jsonLoaderService) {
+                       JsonLoaderService jsonLoaderService,
+                       FinancialService financialService) {
         this.gameRoomRepository = gameRoomRepository;
         this.playerRepository = playerRepository;
         this.userRepository = userRepository;
@@ -45,6 +48,7 @@ public class RoomService {
         this.transactionService = transactionService;
         this.eventPublisher = eventPublisher;
         this.jsonLoaderService = jsonLoaderService;
+        this.financialService = financialService;
     }
 
     @Transactional
@@ -145,6 +149,41 @@ public class RoomService {
         Player player = playerRepository.findByGameIdAndUserId(roomId, currentUser.getId())
                 .orElseThrow(() -> new PlayerNotFoundException("Player not found in room"));
 
+        if (room.getStatus() == RoomStatus.PLAYING) {
+            Optional<Game> gameOpt = gameRepository.findById(roomId);
+            if (gameOpt.isPresent()) {
+                Game game = gameOpt.get();
+                if (game.getStatus() == GameStatus.STARTED) {
+                    financialService.declareBankruptcy(game, player);
+                    gameRepository.save(game);
+
+                    // Publish bankruptcy event
+                    eventPublisher.publish(game.getId(), GameEvent.of(
+                            EventType.PLAYER_BANKRUPT,
+                            game.getId(),
+                            Map.of(
+                                    "playerId", player.getId(),
+                                    "username", player.getUsername()
+                            ),
+                            game.getVersion()
+                    ));
+
+                    // Broadcast game finish if needed
+                    if (game.getStatus() == GameStatus.FINISHED) {
+                        eventPublisher.publish(game.getId(), GameEvent.of(
+                                EventType.GAME_FINISHED,
+                                game.getId(),
+                                Map.of(
+                                        "winnerId", game.getWinnerId()
+                                ),
+                                game.getVersion()
+                        ));
+                    }
+                }
+            }
+            return null;
+        }
+
         playerRepository.delete(player);
 
         int activePlayersCount = room.getCurrentPlayers() - 1;
@@ -231,6 +270,24 @@ public class RoomService {
     }
 
     @Transactional
+    public RoomResponse updateTokenColor(UUID roomId, String tokenColor) {
+        User currentUser = authenticationService.getCurrentUser();
+        Player player = playerRepository.findByGameIdAndUserId(roomId, currentUser.getId())
+                .orElseThrow(() -> new PlayerNotFoundException("Player not found in room"));
+
+        player.setTokenColor(tokenColor);
+        playerRepository.save(player);
+
+        GameRoom room = gameRoomRepository.findById(roomId)
+                .orElseThrow(() -> new VyaparException("Room not found", "ROOM_NOT_FOUND", HttpStatus.NOT_FOUND));
+
+        RoomResponse response = getRoomResponse(room);
+        eventPublisher.publishRoomUpdate(room.getId(), response);
+
+        return response;
+    }
+
+    @Transactional
     public Game startGame(UUID roomId) {
         User currentUser = authenticationService.getCurrentUser();
         GameRoom room = gameRoomRepository.findById(roomId)
@@ -296,7 +353,8 @@ public class RoomService {
                         p.getUsername(),
                         "https://api.dicebear.com/7.x/pixel-art/svg?seed=" + p.getUsername(),
                         p.getReady(),
-                        p.getUserId().equals(room.getHostId())
+                        p.getUserId().equals(room.getHostId()),
+                        p.getTokenColor() != null ? p.getTokenColor() : "#a855f7"
                 )).collect(Collectors.toList());
 
         return new RoomResponse(

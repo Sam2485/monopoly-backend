@@ -1,6 +1,7 @@
 [
-  { "id": 1, "title": "Lottery Winner", "action": "ADD_MONEY", "amount": 3000 },
-  { "id": 2, "title": "Passed Exam Bonus", "action": "ADD_MONEY", "amount": 1000 },
+  { "id": 1, "title": "Exam fees Scholarship 600", "action": "ADD_MONEY", "amount": 600 },
+  { "id": 2, "title": "Valorant contest prize 800", "action": "ADD_MONEY", "amount": 800 },
   { "id": 3, "title": "Get Out of Jail Free", "action": "GET_OUT_OF_JAIL", "amount": 0 },
-  { "id": 4, "title": "Welcome Reward", "action": "ADD_MONEY", "amount": 500 }
+  { "id": 4, "title": "Lagna cha hunda 3500", "action": "ADD_MONEY", "amount": 3500 },
+  { "id": 5, "title": "Beuty Contest winner 2000", "action": "ADD_MONEY", "amount": 2000 }
 ]

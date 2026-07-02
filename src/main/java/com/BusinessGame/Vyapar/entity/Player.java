@@ -56,6 +56,9 @@ public class Player {
     @Column(name = "has_built_house_this_turn", nullable = false)
     private Boolean hasBuiltHouseThisTurn;
 
+    @Column(name = "token_color", length = 30)
+    private String tokenColor;
+
     @Version
     private Long version;
 
@@ -74,5 +77,6 @@ public class Player {
         if (ready == null) ready = false;
         if (status == null) status = PlayerStatus.ACTIVE;
         if (hasBuiltHouseThisTurn == null) hasBuiltHouseThisTurn = false;
+        if (tokenColor == null) tokenColor = "#a855f7";
     }
 }

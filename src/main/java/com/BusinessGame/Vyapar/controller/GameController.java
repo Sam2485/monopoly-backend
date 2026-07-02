@@ -3,13 +3,16 @@ package com.BusinessGame.Vyapar.controller;
 import com.BusinessGame.Vyapar.dto.ActionRequest;
 import com.BusinessGame.Vyapar.dto.ApiResponse;
 import com.BusinessGame.Vyapar.dto.GameStateResponse;
+import com.BusinessGame.Vyapar.dto.TransactionResponse;
 import com.BusinessGame.Vyapar.entity.User;
 import com.BusinessGame.Vyapar.service.AuthenticationService;
 import com.BusinessGame.Vyapar.service.GameEngineFacade;
 import com.BusinessGame.Vyapar.service.GameService;
+import com.BusinessGame.Vyapar.service.TransactionService;
 import com.BusinessGame.Vyapar.repository.PlayerRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -20,15 +23,18 @@ public class GameController {
     private final GameEngineFacade gameEngineFacade;
     private final AuthenticationService authenticationService;
     private final PlayerRepository playerRepository;
+    private final TransactionService transactionService;
 
     public GameController(GameService gameService,
                           GameEngineFacade gameEngineFacade,
                           AuthenticationService authenticationService,
-                          PlayerRepository playerRepository) {
+                          PlayerRepository playerRepository,
+                          TransactionService transactionService) {
         this.gameService = gameService;
         this.gameEngineFacade = gameEngineFacade;
         this.authenticationService = authenticationService;
         this.playerRepository = playerRepository;
+        this.transactionService = transactionService;
     }
 
     @GetMapping("/{gameId}")
@@ -49,5 +55,11 @@ public class GameController {
 
         GameStateResponse state = gameEngineFacade.performAction(gameId, player.getId(), request);
         return ApiResponse.success(state, "Action performed successfully");
+    }
+
+    @GetMapping("/{gameId}/transactions")
+    public ApiResponse<List<TransactionResponse>> getGameTransactions(@PathVariable UUID gameId) {
+        List<TransactionResponse> history = transactionService.getGameHistory(gameId);
+        return ApiResponse.success(history, "Loaded game transactions");
     }
 }

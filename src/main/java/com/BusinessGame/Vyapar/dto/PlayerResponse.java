@@ -18,4 +18,5 @@ public class PlayerResponse {
     private PlayerStatus status;
     private boolean connected;
     private boolean hasBuiltHouseThisTurn;
+    private String tokenColor;
 }

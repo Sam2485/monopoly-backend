@@ -36,7 +36,8 @@ public class PlayerController {
                 p.getNumberOfProperties(),
                 p.getStatus(),
                 p.getConnected(),
-                p.getHasBuiltHouseThisTurn()
+                p.getHasBuiltHouseThisTurn(),
+                p.getTokenColor() != null ? p.getTokenColor() : "#a855f7"
         );
         return ApiResponse.success(response, "Loaded player details");
     }

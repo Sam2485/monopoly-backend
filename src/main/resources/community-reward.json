@@ -1,6 +1,6 @@
 [
-  { "id": 1, "title": "Festival Bonus", "action": "ADD_MONEY", "amount": 1000 },
-  { "id": 2, "title": "Stock Dividend", "action": "ADD_MONEY", "amount": 1500 },
-  { "id": 3, "title": "Inheritance Received", "action": "ADD_MONEY", "amount": 2000 },
-  { "id": 4, "title": "Tax Refund", "action": "ADD_MONEY", "amount": 500 }
+  { "id": 1, "title": "Gharchyanni Paise Pathavale 2000", "action": "ADD_MONEY", "amount": 2000 },
+  { "id": 2, "title": "Best Actor Award 2500", "action": "ADD_MONEY", "amount": 2500 },
+  { "id": 3, "title": "Inheritance Received 2000", "action": "ADD_MONEY", "amount": 2000 },
+  { "id": 4, "title": "Tax Refund 500", "action": "ADD_MONEY", "amount": 500 }
 ]

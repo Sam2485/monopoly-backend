@@ -43,6 +43,15 @@ public class RoomController {
         return ApiResponse.success(response, "Toggled ready status");
     }
 
+    @PutMapping("/{roomId}/token-color")
+    public ApiResponse<RoomResponse> updateTokenColor(
+            @PathVariable UUID roomId,
+            @RequestParam String tokenColor
+    ) {
+        RoomResponse response = roomService.updateTokenColor(roomId, tokenColor);
+        return ApiResponse.success(response, "Updated token color successfully");
+    }
+
     @PostMapping("/{roomId}/start")
     public ApiResponse<UUID> startGame(@PathVariable UUID roomId) {
         Game game = roomService.startGame(roomId);

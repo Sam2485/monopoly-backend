@@ -14,4 +14,5 @@ public class PlayerLobbyResponse {
     private String avatar;
     private boolean ready;
     private boolean host;
+    private String tokenColor;
 }

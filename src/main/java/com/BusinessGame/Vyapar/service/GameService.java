@@ -51,7 +51,8 @@ public class GameService {
                         p.getNumberOfProperties(),
                         p.getStatus(),
                         p.getConnected(),
-                        p.getHasBuiltHouseThisTurn()
+                        p.getHasBuiltHouseThisTurn(),
+                        p.getTokenColor() != null ? p.getTokenColor() : "#a855f7"
                 )).collect(Collectors.toList());
 
         List<OwnedProperty> ownedProperties = ownedPropertyRepository.findByGameId(gameId);

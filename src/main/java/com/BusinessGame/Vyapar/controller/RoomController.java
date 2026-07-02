@@ -48,4 +48,10 @@ public class RoomController {
         Game game = roomService.startGame(roomId);
         return ApiResponse.success(game.getId(), "Game started successfully");
     }
+
+    @GetMapping("/active")
+    public ApiResponse<RoomResponse> getActiveRoom() {
+        RoomResponse response = roomService.getActiveRoomForCurrentUser();
+        return ApiResponse.success(response, "Fetched active room");
+    }
 }

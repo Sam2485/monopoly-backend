@@ -174,6 +174,42 @@ public class RoomService {
     }
 
     @Transactional
+    public RoomResponse removePlayerFromRoom(UUID roomId, UUID userId) {
+        GameRoom room = gameRoomRepository.findById(roomId)
+                .orElseThrow(() -> new VyaparException("Room not found", "ROOM_NOT_FOUND", HttpStatus.NOT_FOUND));
+
+        Player player = playerRepository.findByGameIdAndUserId(roomId, userId)
+                .orElseThrow(() -> new PlayerNotFoundException("Player not found in room"));
+
+        playerRepository.delete(player);
+
+        int activePlayersCount = room.getCurrentPlayers() - 1;
+        if (activePlayersCount <= 0) {
+            gameRoomRepository.delete(room);
+            return null;
+        }
+
+        room.setCurrentPlayers(activePlayersCount);
+
+        // If host leaves, assign a new host
+        if (room.getHostId().equals(userId)) {
+            List<Player> remainingPlayers = playerRepository.findByGameId(roomId);
+            if (!remainingPlayers.isEmpty()) {
+                Player newHost = remainingPlayers.get(0);
+                room.setHostId(newHost.getUserId());
+                newHost.setReady(true); // new host is ready
+                playerRepository.save(newHost);
+            }
+        }
+        gameRoomRepository.save(room);
+
+        RoomResponse response = getRoomResponse(room);
+        eventPublisher.publishRoomUpdate(room.getId(), response);
+
+        return response;
+    }
+
+    @Transactional
     public RoomResponse readyPlayer(UUID roomId) {
         User currentUser = authenticationService.getCurrentUser();
         Player player = playerRepository.findByGameIdAndUserId(roomId, currentUser.getId())
@@ -278,5 +314,21 @@ public class RoomService {
             sb.append(chars.charAt(random.nextInt(chars.length())));
         }
         return sb.toString();
+    }
+
+    @Transactional(readOnly = true)
+    public RoomResponse getActiveRoomForCurrentUser() {
+        User currentUser = authenticationService.getCurrentUser();
+        List<Player> players = playerRepository.findByUserId(currentUser.getId());
+        for (Player p : players) {
+            Optional<GameRoom> roomOpt = gameRoomRepository.findById(p.getGameId());
+            if (roomOpt.isPresent()) {
+                GameRoom room = roomOpt.get();
+                if (room.getStatus() != RoomStatus.FINISHED) {
+                    return getRoomResponse(room);
+                }
+            }
+        }
+        return null;
     }
 }

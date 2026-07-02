@@ -285,7 +285,9 @@ public class GameEngineFacade {
                 }
                 break;
             case INCOME_TAX:
-                taxService.payIncomeTax(player);
+                int incTax = taxService.payIncomeTax(player);
+                game.setRestRoomPool(game.getRestRoomPool() + incTax);
+                gameRepository.save(game);
                 eventPublisher.publish(game.getId(), GameEvent.of(EventType.MONEY_UPDATED, game.getId(), Map.of(
                         "playerId", player.getId(),
                         "balance", player.getBalance()
@@ -293,7 +295,9 @@ public class GameEngineFacade {
                 checkNegativeBalance(game, player);
                 break;
             case WEALTH_TAX:
-                taxService.payWealthTax(player);
+                int wlthTax = taxService.payWealthTax(player);
+                game.setRestRoomPool(game.getRestRoomPool() + wlthTax);
+                gameRepository.save(game);
                 eventPublisher.publish(game.getId(), GameEvent.of(EventType.MONEY_UPDATED, game.getId(), Map.of(
                         "playerId", player.getId(),
                         "balance", player.getBalance()
@@ -323,6 +327,25 @@ public class GameEngineFacade {
                 checkNegativeBalance(game, player);
                 break;
             case REST_ROOM:
+                int jackpot = game.getRestRoomPool();
+                if (jackpot > 0) {
+                    player.setBalance(player.getBalance() + jackpot);
+                    playerRepository.save(player);
+                    game.setRestRoomPool(0);
+                    gameRepository.save(game);
+                    
+                    transactionService.recordTransaction(
+                            game.getId(),
+                            player.getId(),
+                            TransactionType.START_REWARD,
+                            jackpot,
+                            player.getUsername() + " landed on Rest Room and claimed the Tax Jackpot of ₹" + jackpot + "!"
+                    );
+                    eventPublisher.publish(game.getId(), GameEvent.of(EventType.MONEY_UPDATED, game.getId(), Map.of(
+                            "playerId", player.getId(),
+                            "balance", player.getBalance()
+                    ), game.getVersion()));
+                }
                 player.setSkippedTurns(1);
                 playerRepository.save(player);
                 transactionService.recordTransaction(
@@ -334,14 +357,15 @@ public class GameEngineFacade {
                 );
                 break;
             case CLUB:
-                player.setBalance(player.getBalance() - 100);
+                int clubFee = jsonLoaderService.getGameRules().getClubFee();
+                player.setBalance(player.getBalance() - clubFee);
                 playerRepository.save(player);
                 transactionService.recordTransaction(
                         game.getId(),
                         player.getId(),
                         TransactionType.CLUB_PAYMENT,
-                        100,
-                        player.getUsername() + " paid Club fee of ₹100."
+                        clubFee,
+                        player.getUsername() + " paid Club fee of ₹" + clubFee + "."
                 );
                 eventPublisher.publish(game.getId(), GameEvent.of(EventType.MONEY_UPDATED, game.getId(), Map.of(
                         "playerId", player.getId(),

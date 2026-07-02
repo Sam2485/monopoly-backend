@@ -47,6 +47,9 @@ public class Game {
     @Column(name = "finished_at")
     private LocalDateTime finishedAt;
 
+    @Column(name = "rest_room_pool", nullable = false)
+    private Integer restRoomPool = 0;
+
     @PrePersist
     protected void onCreate() {
         if (id == null) {
@@ -54,6 +57,9 @@ public class Game {
         }
         if (hasRolled == null) {
             hasRolled = false;
+        }
+        if (restRoomPool == null) {
+            restRoomPool = 0;
         }
         startedAt = LocalDateTime.now();
     }

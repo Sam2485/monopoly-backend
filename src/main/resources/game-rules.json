@@ -2,7 +2,7 @@
   "startingMoney": 20000,
   "passStartReward": 1500,
   "jailBail": 500,
-  "clubFee": 100,
+  "clubFee": 200,
   "incomeTaxPercentage": 2,
   "wealthTaxPerProperty": 50,
   "mortgagePercentage": 50,

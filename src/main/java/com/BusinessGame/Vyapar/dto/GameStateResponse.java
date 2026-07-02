@@ -19,4 +19,5 @@ public class GameStateResponse {
     private List<PropertyResponse> properties;
     private DiceResponse dice;
     private PendingAction pendingAction;
+    private Integer restRoomPool;
 }

@@ -38,7 +38,7 @@ public class TaxService {
     }
 
     @Transactional
-    public void payIncomeTax(Player player) {
+    public int payIncomeTax(Player player) {
         int taxAmount = calculateIncomeTax(player);
         player.setBalance(player.getBalance() - taxAmount);
         playerRepository.save(player);
@@ -49,10 +49,11 @@ public class TaxService {
                 taxAmount,
                 "Paid Income Tax (2% of balance): ₹" + taxAmount
         );
+        return taxAmount;
     }
 
     @Transactional
-    public void payWealthTax(Player player) {
+    public int payWealthTax(Player player) {
         int taxAmount = calculateWealthTax(player);
         player.setBalance(player.getBalance() - taxAmount);
         playerRepository.save(player);
@@ -63,5 +64,6 @@ public class TaxService {
                 taxAmount,
                 "Paid Wealth Tax (₹50 per property): ₹" + taxAmount
         );
+        return taxAmount;
     }
 }

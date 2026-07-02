@@ -89,6 +89,7 @@ public class GameService {
         state.setProperties(propertyResponses);
         state.setPendingAction(game.getPendingAction());
         state.setDice(null); // Loaded on demand when rolled
+        state.setRestRoomPool(game.getRestRoomPool());
 
         return state;
     }

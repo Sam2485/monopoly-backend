@@ -20,4 +20,5 @@ public class GameStateResponse {
     private DiceResponse dice;
     private PendingAction pendingAction;
     private Integer restRoomPool;
+    private Boolean hasRolled;
 }

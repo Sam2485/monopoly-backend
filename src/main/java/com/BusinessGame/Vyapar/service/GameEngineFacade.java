@@ -575,15 +575,37 @@ public class GameEngineFacade {
     }
 
     private void handleEndTurn(Game game, Player player) {
-        if (game.getPendingAction() != PendingAction.NONE) {
+        if (game.getPendingAction() != PendingAction.NONE && game.getPendingAction() != PendingAction.RECOVERY) {
             throw new VyaparException("Cannot end turn while decision is pending: " + game.getPendingAction(), "PENDING_ACTION_ACTIVE", HttpStatus.BAD_REQUEST);
         }
 
         if (player.getStatus() == PlayerStatus.RECOVERY) {
             if (player.getBalance() < 0) {
-                // If they have no assets to sell/mortgage, declare bankruptcy
-                long ownedProps = ownedPropertyRepository.countByGameIdAndOwnerId(game.getId(), player.getId());
-                if (ownedProps == 0) {
+                // If they have no assets to sell/mortgage, or their maximum liquidation value is insufficient, declare bankruptcy
+                List<OwnedProperty> myProps = ownedPropertyRepository.findByGameIdAndOwnerId(game.getId(), player.getId());
+                long unmortgagedCount = myProps.stream().filter(p -> !p.getMortgaged()).count();
+                long totalDevelopments = myProps.stream().mapToLong(OwnedProperty::getDevelopmentLevel).sum();
+
+                int maxPotentialLiquidation = 0;
+                for (OwnedProperty ownership : myProps) {
+                    PropertyConfig config = jsonLoaderService.getPropertyConfig(ownership.getPropertyId());
+                    if (config != null) {
+                        if (!ownership.getMortgaged()) {
+                            maxPotentialLiquidation += (int) (config.getPrice() * 0.50);
+                        }
+                        if (ownership.getDevelopmentLevel() > 0) {
+                            if (ownership.getDevelopmentLevel() <= 3) {
+                                maxPotentialLiquidation += (int) (config.getHousePrice() * 0.50 * ownership.getDevelopmentLevel());
+                            } else if (ownership.getDevelopmentLevel() == 4) {
+                                maxPotentialLiquidation += (int) (config.getHotelPrice() * 0.50);
+                            }
+                        }
+                    }
+                }
+
+                boolean canDeclareBankruptcy = (unmortgagedCount == 0 && totalDevelopments == 0) || (player.getBalance() + maxPotentialLiquidation < 0);
+
+                if (canDeclareBankruptcy) {
                     financialService.declareBankruptcy(game, player);
                     eventPublisher.publish(game.getId(), GameEvent.of(EventType.PLAYER_BANKRUPT, game.getId(), Map.of(
                             "playerId", player.getId()

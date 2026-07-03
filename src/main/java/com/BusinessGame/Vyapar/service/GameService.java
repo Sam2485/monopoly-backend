@@ -91,6 +91,7 @@ public class GameService {
         state.setPendingAction(game.getPendingAction());
         state.setDice(null); // Loaded on demand when rolled
         state.setRestRoomPool(game.getRestRoomPool());
+        state.setHasRolled(game.getHasRolled());
 
         return state;
     }

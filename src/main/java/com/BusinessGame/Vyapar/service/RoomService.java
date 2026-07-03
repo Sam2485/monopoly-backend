@@ -29,6 +29,10 @@ public class RoomService {
     private final GameEventPublisher eventPublisher;
     private final JsonLoaderService jsonLoaderService;
     private final FinancialService financialService;
+    private final TradeOfferRepository tradeOfferRepository;
+    private final TradeOfferPropertyRepository tradeOfferPropertyRepository;
+    private final TransactionRepository transactionRepository;
+    private final OwnedPropertyRepository ownedPropertyRepository;
     private final Random random = new SecureRandom();
 
     public RoomService(GameRoomRepository gameRoomRepository,
@@ -39,7 +43,11 @@ public class RoomService {
                        TransactionService transactionService,
                        GameEventPublisher eventPublisher,
                        JsonLoaderService jsonLoaderService,
-                       FinancialService financialService) {
+                       FinancialService financialService,
+                       TradeOfferRepository tradeOfferRepository,
+                       TradeOfferPropertyRepository tradeOfferPropertyRepository,
+                       TransactionRepository transactionRepository,
+                       OwnedPropertyRepository ownedPropertyRepository) {
         this.gameRoomRepository = gameRoomRepository;
         this.playerRepository = playerRepository;
         this.userRepository = userRepository;
@@ -49,6 +57,10 @@ public class RoomService {
         this.eventPublisher = eventPublisher;
         this.jsonLoaderService = jsonLoaderService;
         this.financialService = financialService;
+        this.tradeOfferRepository = tradeOfferRepository;
+        this.tradeOfferPropertyRepository = tradeOfferPropertyRepository;
+        this.transactionRepository = transactionRepository;
+        this.ownedPropertyRepository = ownedPropertyRepository;
     }
 
     @Transactional
@@ -150,37 +162,7 @@ public class RoomService {
                 .orElseThrow(() -> new PlayerNotFoundException("Player not found in room"));
 
         if (room.getStatus() == RoomStatus.PLAYING) {
-            Optional<Game> gameOpt = gameRepository.findById(roomId);
-            if (gameOpt.isPresent()) {
-                Game game = gameOpt.get();
-                if (game.getStatus() == GameStatus.STARTED) {
-                    financialService.declareBankruptcy(game, player);
-                    gameRepository.save(game);
-
-                    // Publish bankruptcy event
-                    eventPublisher.publish(game.getId(), GameEvent.of(
-                            EventType.PLAYER_BANKRUPT,
-                            game.getId(),
-                            Map.of(
-                                    "playerId", player.getId(),
-                                    "username", player.getUsername()
-                            ),
-                            game.getVersion()
-                    ));
-
-                    // Broadcast game finish if needed
-                    if (game.getStatus() == GameStatus.FINISHED) {
-                        eventPublisher.publish(game.getId(), GameEvent.of(
-                                EventType.GAME_FINISHED,
-                                game.getId(),
-                                Map.of(
-                                        "winnerId", game.getWinnerId()
-                                ),
-                                game.getVersion()
-                        ));
-                    }
-                }
-            }
+            deleteMatch(roomId);
             return null;
         }
 
@@ -374,6 +356,34 @@ public class RoomService {
         return sb.toString();
     }
 
+    private void deleteMatch(UUID roomId) {
+        // 1. Delete trade offer properties
+        List<TradeOffer> tradeOffers = tradeOfferRepository.findByGameId(roomId);
+        for (TradeOffer offer : tradeOffers) {
+            tradeOfferPropertyRepository.deleteByTradeOfferId(offer.getId());
+        }
+        // 2. Delete trade offers
+        tradeOfferRepository.deleteAll(tradeOffers);
+
+        // 3. Delete transactions
+        List<Transaction> transactions = transactionRepository.findByGameId(roomId);
+        transactionRepository.deleteAll(transactions);
+
+        // 4. Delete owned properties
+        List<OwnedProperty> properties = ownedPropertyRepository.findByGameId(roomId);
+        ownedPropertyRepository.deleteAll(properties);
+
+        // 5. Delete players
+        List<Player> players = playerRepository.findByGameId(roomId);
+        playerRepository.deleteAll(players);
+
+        // 6. Delete game
+        gameRepository.deleteById(roomId);
+
+        // 7. Delete game room
+        gameRoomRepository.deleteById(roomId);
+    }
+
     @Transactional(readOnly = true)
     public RoomResponse getActiveRoomForCurrentUser() {
         User currentUser = authenticationService.getCurrentUser();
@@ -383,6 +393,10 @@ public class RoomService {
             if (roomOpt.isPresent()) {
                 GameRoom room = roomOpt.get();
                 if (room.getStatus() != RoomStatus.FINISHED) {
+                    Optional<Game> gameOpt = gameRepository.findById(room.getId());
+                    if (gameOpt.isPresent() && gameOpt.get().getStatus() == GameStatus.FINISHED) {
+                        continue;
+                    }
                     return getRoomResponse(room);
                 }
             }

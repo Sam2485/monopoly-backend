@@ -157,14 +157,6 @@ public class TradeService {
         Player receiver = playerRepository.findById(trade.getReceiverId())
                 .orElseThrow(() -> new PlayerNotFoundException("Receiver not found"));
 
-        if (proposer.getBalance() < trade.getOfferedCash()) {
-            throw new InsufficientBalanceException("Proposer has insufficient balance to complete trade");
-        }
-
-        if (receiver.getBalance() < trade.getRequestedCash()) {
-            throw new InsufficientBalanceException("Receiver has insufficient balance to complete trade");
-        }
-
         // Fetch properties
         List<Integer> offeredProperties = tradeOfferPropertyRepository.findByTradeOfferId(trade.getId()).stream()
                 .filter(TradeOfferProperty::getIsOffered)
@@ -245,6 +237,9 @@ public class TradeService {
 
         playerRepository.save(proposer);
         playerRepository.save(receiver);
+
+        updatePlayerRecoveryStatus(game, proposer);
+        updatePlayerRecoveryStatus(game, receiver);
 
         // Mark trade as accepted
         trade.setStatus(TradeStatus.ACCEPTED);
@@ -427,5 +422,53 @@ public class TradeService {
                 trade.getStatus(),
                 trade.getCreatedAt()
         );
+    }
+
+    private void updatePlayerRecoveryStatus(Game game, Player player) {
+        if (player.getBalance() < 0) {
+            if (player.getStatus() == PlayerStatus.ACTIVE) {
+                player.setStatus(PlayerStatus.RECOVERY);
+                playerRepository.save(player);
+                game.setPendingAction(PendingAction.RECOVERY);
+                gameRepository.save(game);
+
+                transactionService.recordTransaction(
+                        game.getId(),
+                        player.getId(),
+                        TransactionType.BANKRUPTCY,
+                        0,
+                        player.getUsername() + " entered Recovery Mode due to negative balance (₹" + player.getBalance() + ")"
+                );
+
+                eventPublisher.publish(game.getId(), GameEvent.of(
+                        EventType.RECOVERY_STARTED, 
+                        game.getId(), 
+                        Map.of("playerId", player.getId()), 
+                        game.getVersion()
+                ));
+            }
+        } else {
+            if (player.getStatus() == PlayerStatus.RECOVERY) {
+                player.setStatus(PlayerStatus.ACTIVE);
+                playerRepository.save(player);
+                game.setPendingAction(PendingAction.NONE);
+                gameRepository.save(game);
+
+                transactionService.recordTransaction(
+                        game.getId(),
+                        player.getId(),
+                        TransactionType.START_REWARD,
+                        0,
+                        player.getUsername() + " recovered and exited Recovery Mode (₹" + player.getBalance() + ")"
+                );
+
+                eventPublisher.publish(game.getId(), GameEvent.of(
+                        EventType.RECOVERY_COMPLETED, 
+                        game.getId(), 
+                        Map.of("playerId", player.getId()), 
+                        game.getVersion()
+                ));
+            }
+        }
     }
 }

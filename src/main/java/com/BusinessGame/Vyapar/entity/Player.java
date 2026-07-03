@@ -67,7 +67,7 @@ public class Player {
         if (id == null) {
             id = UUID.randomUUID();
         }
-        if (balance == null) balance = 20000;
+        if (balance == null) balance = 25000;
         if (position == null) position = 0;
         if (numberOfProperties == null) numberOfProperties = 0;
         if (consecutiveDoubles == null) consecutiveDoubles = 0;

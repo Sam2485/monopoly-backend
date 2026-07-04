@@ -75,6 +75,12 @@ public class TradeService {
             throw new InsufficientBalanceException("Proposer has insufficient balance");
         }
 
+        // Limit to only one active pending trade proposal at a time
+        List<TradeOffer> pendingTrades = tradeOfferRepository.findByGameIdAndProposerIdAndStatus(gameId, proposerPlayerId, TradeStatus.PENDING);
+        if (!pendingTrades.isEmpty()) {
+            throw new VyaparException("You already have an active pending trade proposal. Cancel or resolve it before making a new one.", "PENDING_TRADE_EXISTS", HttpStatus.BAD_REQUEST);
+        }
+
         // Validate property ownership & improvements (Option B)
         validatePropertyOwnership(gameId, proposerPlayerId, request.getOfferedProperties());
         validatePropertyOwnership(gameId, request.getReceiverId(), request.getRequestedProperties());

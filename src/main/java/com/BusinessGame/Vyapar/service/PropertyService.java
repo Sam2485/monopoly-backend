@@ -386,7 +386,22 @@ public class PropertyService {
 
         if ("PROPERTY".equals(config.getType().name())) {
             int level = op.getDevelopmentLevel();
-            return config.getRent().get(level);
+            int rent = config.getRent().get(level);
+            if (level == 0) {
+                String group = config.getGroup();
+                List<PropertyConfig> groupConfigs = jsonLoaderService.getAllPropertyConfigs().stream()
+                        .filter(p -> group.equals(p.getGroup()))
+                        .collect(Collectors.toList());
+                long ownedInGroup = groupConfigs.stream()
+                        .filter(p -> ownedPropertyRepository.findByGameIdAndPropertyId(gameId, p.getId())
+                                .map(gProp -> gProp.getOwnerId().equals(ownerId) && !gProp.getMortgaged())
+                                .orElse(false))
+                        .count();
+                if (ownedInGroup >= 3) {
+                    rent *= 2;
+                }
+            }
+            return rent;
         } else if ("UTILITY".equals(config.getType().name())) {
             // Check if Railway and Electricity (IDs 21 & 22) are owned by the same player
             boolean ownsRailway = ownedPropertyRepository.findByGameIdAndPropertyId(gameId, 21)

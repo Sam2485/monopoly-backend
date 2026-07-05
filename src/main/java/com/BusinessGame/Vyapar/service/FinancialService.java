@@ -91,6 +91,12 @@ public class FinancialService {
 
         // Check if there is a winner
         checkWinner(game);
+
+        // Reset game pending action to NONE if game is not over
+        if (game.getStatus() == GameStatus.STARTED) {
+            game.setPendingAction(PendingAction.NONE);
+            gameRepository.save(game);
+        }
     }
 
     @Transactional

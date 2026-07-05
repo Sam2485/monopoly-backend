@@ -6,5 +6,7 @@
   { "id": 5, "title": "M2 back Rechecking 800", "action": "PAY_MONEY", "amount": 800 },
   { "id": 6, "title": "Community chest var alyachi party 1300", "action": "PAY_MONEY", "amount": 1300 },
   { "id": 7, "title": "Himali ne Chidaval Aura -999", "action": "PAY_MONEY", "amount": 999 },
-  { "id": 8, "title": "Astrotalk fees (10%) 3300", "action": "PAY_MONEY", "amount": 3300 }
+  { "id": 8, "title": "Astrotalk fees (10%) 3300", "action": "PAY_MONEY", "amount": 3300 },
+  { "id": 9, "title": "Go to Jail", "action": "GO_TO_JAIL", "amount": 0 },
+  { "id": 10, "title": "Go to Jail", "action": "GO_TO_JAIL", "amount": 0 }
 ]

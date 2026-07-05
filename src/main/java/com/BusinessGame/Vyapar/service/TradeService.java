@@ -355,14 +355,20 @@ public class TradeService {
             if ("PROPERTY".equals(config.getType().name())) {
                 String group = config.getGroup();
                 if (group != null) {
+                    Optional<OwnedProperty> originalOwnership = ownedPropertyRepository.findByGameIdAndPropertyId(gameId, propId);
+                    if (originalOwnership.isEmpty()) continue;
+                    UUID ownerId = originalOwnership.get().getOwnerId();
+
                     List<PropertyConfig> groupConfigs = jsonLoaderService.getAllPropertyConfigs().stream()
                             .filter(p -> group.equals(p.getGroup()))
                             .collect(Collectors.toList());
 
                     for (PropertyConfig gp : groupConfigs) {
                         Optional<OwnedProperty> gpOwnership = ownedPropertyRepository.findByGameIdAndPropertyId(gameId, gp.getId());
-                        if (gpOwnership.isPresent() && gpOwnership.get().getDevelopmentLevel() > 0) {
-                            throw new VyaparException("Cannot trade property in color group " + group + " because " + gp.getName() + " has improvements (houses/hotels).", "COLOR_GROUP_HAS_DEVELOPMENTS", HttpStatus.BAD_REQUEST);
+                        if (gpOwnership.isPresent() 
+                                && gpOwnership.get().getOwnerId().equals(ownerId) 
+                                && gpOwnership.get().getDevelopmentLevel() > 0) {
+                            throw new VyaparException("Cannot trade property in color group " + group + " because you have improvements (houses/hotels) built on " + gp.getName() + ".", "COLOR_GROUP_HAS_DEVELOPMENTS", HttpStatus.BAD_REQUEST);
                         }
                     }
                 }
